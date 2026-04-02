@@ -17,6 +17,10 @@ async function main() {
   let isFirstRun = false;
 
   if (!soul) {
+    // Don't overwrite a corrupted soul file (race condition during write)
+    if (loadSoul._fileExistsButCorrupt) {
+      process.exit(0); // Skip this hook invocation, file will be readable next time
+    }
     soul = createSoul();
     isFirstRun = true;
   }

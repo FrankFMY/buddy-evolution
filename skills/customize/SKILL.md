@@ -24,7 +24,7 @@ Let the user fully customize their companion. All progression (XP, level, achiev
 4. When the user confirms, edit `~/.buddy-evolution/soul.json`:
    - Change `identity.species`, `identity.personality`, `identity.name` as requested
    - Update `identity.emoji` to match species:
-     duck🦆 goose🪿 blob🫠 snail🐌 cat🐱 rabbit🐰 owl🦉 penguin🐧 turtle🐢 octopus🐙 axolotl🦎 ghost👻 robot🤖 dragon🐉 capybara🦫 mushroom🍄 cactus🌵 chonk🐻
+     duck🦆 goose🦢 blob👾 snail🐌 cat🐱 rabbit🐰 owl🦉 penguin🐧 turtle🐢 octopus🐙 axolotl🦎 ghost👻 robot🤖 dragon🐉 capybara🐾 mushroom🍄 cactus🌵 chonk🐻
    - Update `identity.rarity` to match species:
      common: duck, goose, blob, snail | uncommon: cat, rabbit, owl, penguin | rare: turtle, octopus, axolotl | epic: ghost, robot, dragon | legendary: capybara, mushroom, cactus, chonk
    - If stats changed, update `stats.base` (do NOT touch `stats.growth` — that's earned)

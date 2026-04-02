@@ -185,11 +185,11 @@ Use `/buddy-evolution:evolve` at Level 5 and 10 to choose. Choices are permanent
 
 | Rarity | Species |
 |---|---|
-| Common | 🦆 Duck, 🪿 Goose, 🫠 Blob, 🐌 Snail |
+| Common | 🦆 Duck, 🦢 Goose, 👾 Blob, 🐌 Snail |
 | Uncommon | 🐱 Cat, 🐰 Rabbit, 🦉 Owl, 🐧 Penguin |
 | Rare | 🐢 Turtle, 🐙 Octopus, 🦎 Axolotl |
 | Epic | 👻 Ghost, 🤖 Robot, 🐉 Dragon |
-| Legendary | 🦫 Capybara, 🍄 Mushroom, 🌵 Cactus, 🐻 Chonk |
+| Legendary | 🐾 Capybara, 🍄 Mushroom, 🌵 Cactus, 🐻 Chonk |
 
 Species is randomly assigned at creation. Use `/buddy-evolution:customize` to change anytime.
 

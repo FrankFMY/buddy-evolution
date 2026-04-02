@@ -173,6 +173,9 @@ if [ -n "$REACTION" ]; then
   LAST_REACTED=$TOOLS
   echo "{\"tools\":$TOOLS,\"edits\":$EDITS,\"tests\":$TESTS,\"reads\":$READS,\"rejects\":$REJECTS,\"firstFile\":\"$SAFE_FIRST\",\"lastReactedTool\":$LAST_REACTED}" > "$COUNTER_FILE"
 
+  # Output to BOTH stderr (user sees in terminal) AND stdout JSON (Claude sees in context)
+  echo "$REACTION" >&2
+
   SAFE_REACTION=$(echo "$REACTION" | sed 's/"/\\"/g')
   cat <<ENDJSON
 {"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"BUDDY REACTION: ${SAFE_REACTION} — Weave this naturally into your next response."}}

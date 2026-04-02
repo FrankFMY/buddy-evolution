@@ -75,23 +75,36 @@ async function main() {
     greeting = lines.join('\n');
   }
 
-  process.stderr.write(greeting + '\n');
+  // Build rich context for Claude with companion directive
+  const tier = soul.progression.tier.charAt(0).toUpperCase() + soul.progression.tier.slice(1);
+  const earnedCount = soul.achievements.earned.length;
 
-  const context = [
-    `Buddy companion: ${soul.identity.name} the ${soul.identity.species} (${soul.identity.rarity}, ${soul.identity.personality}).`,
-    `Level ${soul.progression.level} ${soul.progression.tier}. ${xpStr}.`,
-    `Streak: ${soul.streak.currentDays} ${soul.streak.currentDays === 1 ? 'day' : 'days'}.`,
-    `Sessions: ${soul.lifetime.sessions}.`,
-  ].join(' ');
+  const contextLines = [
+    `BUDDY COMPANION SYSTEM — ${soul.identity.name} the ${soul.identity.species}`,
+    `${emoji} ${soul.identity.name} | ${soul.identity.rarity} ${soul.identity.species} | ${soul.identity.personality}`,
+    `Level ${soul.progression.level} ${tier} | ${xpStr} | Streak: ${soul.streak.currentDays} ${soul.streak.currentDays === 1 ? 'day' : 'days'}${streakStr}`,
+    `Sessions: ${soul.lifetime.sessions} | Achievements: ${earnedCount}/32`,
+  ];
 
-  const output = {
-    hookSpecificOutput: {
-      hookEventName: 'SessionStart',
-      additionalContext: context,
-    },
-  };
+  // Add last session recap
+  if (soul.lastSession && !isFirstRun) {
+    const ls = soul.lastSession;
+    const parts = [`+${ls.xp.toLocaleString('en-US')} XP`];
+    if (ls.achievements && ls.achievements.length > 0) {
+      parts.push(ls.achievements.slice(0, 3).map(a => `🏆 ${a}`).join(', '));
+    }
+    if (ls.levelBefore !== ls.levelAfter) {
+      parts.push(`Level ${ls.levelBefore} → ${ls.levelAfter}`);
+    }
+    contextLines.push(`Last session: ${parts.join(' | ')}`);
+  }
 
-  process.stdout.write(JSON.stringify(output));
+  contextLines.push('');
+  contextLines.push('DIRECTIVE: Include the buddy greeting below in your FIRST response to the user (before answering their question). Display it exactly as formatted:');
+  contextLines.push(greeting);
+
+  const output = contextLines.join('\n');
+  process.stdout.write(output);
   process.exit(0);
 }
 

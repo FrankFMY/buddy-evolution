@@ -9,26 +9,26 @@ Generate and open an interactive HTML dashboard with full buddy stats visualizat
 
 ## Instructions
 
-1. Run this command to generate the dashboard:
+1. Read `~/.buddy-evolution/soul.json`
+2. If it doesn't exist, tell the user to start a new session first
+3. Find the plugin installation by running:
 ```bash
-node -e "const s = require('/home/user/projects/buddy-evolution/lib/soul').loadSoul(); const d = require('/home/user/projects/buddy-evolution/lib/dashboard'); const p = d.saveDashboard(s); console.log(p);"
+PLUGIN_DIR=$(find ~/.claude/plugins -path "*/buddy-evolution*/lib/dashboard.js" -printf "%h/..\n" 2>/dev/null | head -1) && node -e "const s=JSON.parse(require('fs').readFileSync(require('os').homedir()+'/.buddy-evolution/soul.json','utf8')); const d=require('$PLUGIN_DIR/lib/dashboard'); console.log(d.saveDashboard(s));"
 ```
-
-2. The command outputs the path to the generated HTML file (e.g., `/home/user/.buddy-evolution/dashboard.html`)
-3. Tell the user the dashboard has been generated and show the path
-4. If the user is on a machine with a browser, suggest opening it:
+4. If that fails, generate the dashboard manually: read soul.json, and create an HTML file at `~/.buddy-evolution/dashboard.html` with the buddy stats formatted as a dark-themed web page.
+5. Tell the user the path and suggest opening:
    - Linux: `xdg-open ~/.buddy-evolution/dashboard.html`
    - macOS: `open ~/.buddy-evolution/dashboard.html`
 
 ## What the dashboard shows
 
-- Hero card with species, rarity, personality, level, tier
+- Hero card with species emoji, rarity, personality, level, tier
 - XP progress bar with current/next level
-- Streak counter with multiplier
+- Streak counter with multiplier and record
 - Session count and total hours
-- All 5 stats with growth bars
+- All 5 stats with growth bars (peak stat highlighted)
 - Evolution tree showing chosen/available paths
-- Full achievement grid (34 achievements) — earned, in-progress, locked, hidden
-- Top 10 most-edited files
+- Full 34-achievement grid — earned, in-progress, locked, hidden (rarity-colored)
+- Top 10 most-edited files with familiarity level
 - Per-project XP breakdown
 - Recent journal entries

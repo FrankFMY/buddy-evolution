@@ -62,28 +62,28 @@ async function main() {
   // 6. Update test-driven streak
   updateTestDrivenStreak(soul, session);
 
-  // 7. Check weekly summary (before achievements, so it's in the journal before today's entry)
-  checkWeeklySummary(soul);
-
-  // 8. Check achievements
+  // 7. Check achievements
   const newAchievements = checkAchievements(session, soul);
 
-  // 9. Calculate XP (session + achievement bonuses)
+  // 8. Calculate XP (session + achievement bonuses)
   const sessionXP = calculateSessionXP(session, soul.streak.currentDays);
   const achievementXP = newAchievements.reduce((sum, a) => sum + a.xp, 0);
   const totalXP = sessionXP + achievementXP;
   soul.progression.totalXP += totalXP;
 
-  // 10. Track per-project XP
+  // 9. Track per-project XP
   if (projectDir && soul.familiarity[projectDir]) {
     soul.familiarity[projectDir].xpEarned = (soul.familiarity[projectDir].xpEarned || 0) + totalXP;
   }
 
-  // 11. Check level up
+  // 10. Check level up
   const levelResult = checkLevelUp(soul);
 
-  // 12. Update achievement progress
+  // 11. Update achievement progress
   updateProgress(soul);
+
+  // 12. Weekly summary (AFTER XP so this session's XP is included in the snapshot)
+  checkWeeklySummary(soul);
 
   // 13. Save lastSession for next greeting
   soul.lastSession = {
@@ -133,6 +133,23 @@ async function main() {
   process.exit(0);
 }
 
+// Paths that should not be tracked in familiarity (noise, not user code)
+const FAMILIARITY_IGNORE = [
+  /\/\.claude\//,           // Claude internals
+  /\/\.buddy-evolution\//,  // Our own data
+  /^\/tmp\//,               // Temp files
+  /^\/etc\//,               // System config
+  /\/node_modules\//,       // Dependencies
+  /\/\.git\//,              // Git internals
+  /\/\.env/,                // Environment files
+  /package-lock\.json$/,
+  /\.log$/,
+];
+
+function shouldTrackFile(filePath) {
+  return !FAMILIARITY_IGNORE.some(pattern => pattern.test(filePath));
+}
+
 function updateFamiliarity(soul, session) {
   const projectDir = session.projectDir;
   if (!projectDir) return;
@@ -145,7 +162,7 @@ function updateFamiliarity(soul, session) {
   project.sessions++;
 
   const today = new Date().toISOString().slice(0, 10);
-  const editedFiles = session.filesEditedList || [];
+  const editedFiles = (session.filesEditedList || []).filter(shouldTrackFile);
 
   for (const filePath of editedFiles) {
     if (!project.files[filePath]) {
@@ -153,6 +170,13 @@ function updateFamiliarity(soul, session) {
     }
     project.files[filePath].touches++;
     project.files[filePath].last = today;
+  }
+
+  // Prune: keep only top 200 files per project (by touches), remove the rest
+  const entries = Object.entries(project.files);
+  if (entries.length > 200) {
+    entries.sort((a, b) => b[1].touches - a[1].touches);
+    project.files = Object.fromEntries(entries.slice(0, 200));
   }
 }
 

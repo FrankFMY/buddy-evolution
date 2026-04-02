@@ -1,21 +1,23 @@
 # buddy-evolution
 
-Companion progression system for Claude Code. Track achievements, earn XP, grow stats, evolve your buddy, and maintain a session journal — all automatically.
+Companion progression system for Claude Code. Your buddy lives in Claude's personality — shaping greetings, reactions, and communication style based on your coding activity.
 
-Born from the community response to Anthropic's `/buddy` April Fools feature. The ASCII pet is gone, but the progression lives on.
+Born from the community response to Anthropic's `/buddy` April Fools feature. The ASCII pet is gone, but the companion lives on — inside Claude itself.
 
 ## Features
 
+- **Companion personality** — 12 personality types that shape how Claude communicates (analytical, playful, stoic, bold, etc.)
+- **Mood system** — 7 moods based on streak, level, and recent achievements
 - **34 achievements** across 6 categories — Coding, Testing, Debugging, Consistency, Exploration, Meta
 - **XP & leveling** — 20 levels with streak multipliers up to 2x
-- **Stat growth** — DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK evolve from your activity patterns with diminishing returns
+- **Stat growth** — DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK evolve from your activity patterns
 - **Evolution paths** — choose your buddy's evolution at Level 5 and 10 (18 species x 4 final forms)
 - **Session journal** — automatic monthly logs with weekly summaries
-- **Session recap** — see what happened last session when you start a new one
+- **Session recap** — Claude greets you with what happened last session
 - **File familiarity** — track files across projects (New → Familiar → Expert → Nostalgic)
 - **Per-project stats** — XP and sessions tracked per project
 - **Desktop notifications** — OS-native alerts on achievement unlock (Linux/macOS)
-- **Export card** — shareable stats card you can copy-paste anywhere
+- **Visual dashboard** — HTML stats page with charts, achievement grid, evolution tree
 - **Zero dependencies** — pure Node.js, no npm install required
 - **Fully local** — no data leaves your machine
 
@@ -77,14 +79,16 @@ Add to your `~/.claude/settings.json` inside the `"hooks"` object:
 | `/buddy-evolution:evolve` | Choose evolution path (Level 5 / 10) |
 | `/buddy-evolution:rename` | Rename your buddy |
 | `/buddy-evolution:export` | Generate shareable stats card |
+| `/buddy-evolution:dashboard` | Open visual HTML dashboard in browser |
 | `/buddy-evolution:help` | How the plugin works |
 
 ## How It Works
 
 ```
-Session Start ──→ Greeting + last session recap
+Session Start ──→ Inject companion personality + greeting directive
+       │                Claude greets with buddy stats, reflects personality
        │
-   You code normally (plugin doesn't interfere)
+   You code normally (buddy personality shapes Claude's style)
        │
 Session End ────→ Parse transcript ──→ Extract metrics
                                            │

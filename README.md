@@ -6,20 +6,23 @@ Born from the community response to Anthropic's `/buddy` April Fools feature. Th
 
 ## Features
 
-- **Companion personality** — 12 personality types that shape how Claude communicates
-- **Mood system** — 7 moods that shift based on streak, level, and recent achievements
+- **Alive during sessions** — buddy reacts to milestones in real-time (first edit, 25/50/100 tools, tests, rejections)
+- **Personality-aware reactions** — 12 personality types with unique reaction texts for every milestone
+- **Proactive companion** — Claude suggests evolution, celebrates level ups, warns about streaks without being asked
+- **Mood & time-of-day** — 7 moods + different greetings for morning/evening/late night
+- **Session challenges** — goal picked at start from closest unearned achievements
 - **34 achievements** across 6 categories with XP rewards
 - **XP & leveling** — 20 levels with streak multipliers up to 2x
-- **Stat growth** — 5 stats evolve from your activity patterns with diminishing returns
-- **Evolution paths** — choose your buddy's evolution at Level 5 and 10 (18 species × 4 final forms)
+- **Stat growth** — 5 stats evolve with diminishing returns, fastest grower shown at start
+- **Evolution paths** — choose at Level 5 and 10 (18 species × 4 final forms)
 - **Session journal** — automatic monthly logs with weekly summaries
-- **Session recap** — Claude greets you with what happened last session
+- **Session recap** — last session XP, achievements, level changes shown at start
 - **File familiarity** — New → Familiar → Expert → Nostalgic
 - **Per-project stats** — XP and sessions tracked per project
 - **Desktop notifications** — OS-native alerts on achievement unlock
-- **Visual dashboard** — HTML stats page with achievement grid and charts
+- **Visual dashboard** — HTML stats page with charts
 - **Full customization** — change species, personality, name, stats anytime
-- **Auto backup** — 3 rotating soul backups before each save
+- **Auto backup** — 3 rotating soul backups
 - **72 automated tests** — full test suite
 - **Zero dependencies** — pure Node.js, no npm install
 - **Fully local** — no data leaves your machine

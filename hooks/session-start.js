@@ -17,12 +17,28 @@ async function main() {
   let isFirstRun = false;
 
   if (!soul) {
-    // Don't overwrite a corrupted soul file (race condition during write)
-    if (loadSoul._fileExistsButCorrupt) {
-      process.exit(0); // Skip this hook invocation, file will be readable next time
+    // CRITICAL: check if file exists on disk before creating new soul.
+    // Race condition: context compaction triggers SessionStart while file is mid-write.
+    // If file exists but can't parse → skip, don't overwrite. It'll be readable next time.
+    const fs = require('fs');
+    const { SOUL_PATH } = require(path.join(libDir, 'constants'));
+    if (fs.existsSync(SOUL_PATH) && fs.statSync(SOUL_PATH).size > 0) {
+      // Try restoring from backup
+      const backupDir = path.join(path.dirname(SOUL_PATH), 'backups');
+      try {
+        const backups = fs.readdirSync(backupDir).filter(f => f.startsWith('soul-')).sort().reverse();
+        for (const backup of backups) {
+          try {
+            soul = JSON.parse(fs.readFileSync(path.join(backupDir, backup), 'utf-8'));
+            break; // Found valid backup
+          } catch {}
+        }
+      } catch {}
+      if (!soul) process.exit(0); // No valid backup, skip entirely
+    } else {
+      soul = createSoul();
+      isFirstRun = true;
     }
-    soul = createSoul();
-    isFirstRun = true;
   }
 
   const today = new Date().toISOString().slice(0, 10);

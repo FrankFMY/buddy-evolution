@@ -67,9 +67,13 @@ if [ -z "$REACTION" ] && [ "$TESTS" = "1" ] && [ "$TOOL_NAME" = "Bash" ]; then
   REACTION="$BUDDY_EMOJI $BUDDY_NAME appreciates the testing."
 fi
 
-# Output reaction as additionalContext (only when there's a milestone)
+# Output reaction as JSON additionalContext (PostToolUse requires JSON, not plain text)
 if [ -n "$REACTION" ]; then
-  echo "$REACTION"
+  # Escape quotes for JSON
+  SAFE_REACTION=$(echo "$REACTION" | sed 's/"/\\"/g')
+  cat <<ENDJSON
+{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"BUDDY MILESTONE: ${SAFE_REACTION} — Mention this naturally in your next response."}}
+ENDJSON
 fi
 
 exit 0

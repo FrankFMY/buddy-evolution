@@ -6,63 +6,53 @@ Born from the community response to Anthropic's `/buddy` April Fools feature. Th
 
 ## Features
 
-- **Companion personality** — 12 personality types that shape how Claude communicates (analytical, playful, stoic, bold, etc.)
-- **Mood system** — 7 moods based on streak, level, and recent achievements
-- **34 achievements** across 6 categories — Coding, Testing, Debugging, Consistency, Exploration, Meta
+- **Companion personality** — 12 personality types that shape how Claude communicates
+- **Mood system** — 7 moods that shift based on streak, level, and recent achievements
+- **34 achievements** across 6 categories with XP rewards
 - **XP & leveling** — 20 levels with streak multipliers up to 2x
-- **Stat growth** — DEBUGGING, PATIENCE, CHAOS, WISDOM, SNARK evolve from your activity patterns
-- **Evolution paths** — choose your buddy's evolution at Level 5 and 10 (18 species x 4 final forms)
+- **Stat growth** — 5 stats evolve from your activity patterns with diminishing returns
+- **Evolution paths** — choose your buddy's evolution at Level 5 and 10 (18 species × 4 final forms)
 - **Session journal** — automatic monthly logs with weekly summaries
 - **Session recap** — Claude greets you with what happened last session
-- **File familiarity** — track files across projects (New → Familiar → Expert → Nostalgic)
+- **File familiarity** — New → Familiar → Expert → Nostalgic
 - **Per-project stats** — XP and sessions tracked per project
-- **Desktop notifications** — OS-native alerts on achievement unlock (Linux/macOS)
-- **Visual dashboard** — HTML stats page with charts, achievement grid, evolution tree
-- **Zero dependencies** — pure Node.js, no npm install required
+- **Desktop notifications** — OS-native alerts on achievement unlock
+- **Visual dashboard** — HTML stats page with achievement grid and charts
+- **Full customization** — change species, personality, name, stats anytime
+- **Auto backup** — 3 rotating soul backups before each save
+- **72 automated tests** — full test suite
+- **Zero dependencies** — pure Node.js, no npm install
 - **Fully local** — no data leaves your machine
 
 ## Install
-
-Run these two commands inside Claude Code:
 
 ```
 /plugin marketplace add FrankFMY/buddy-evolution
 /plugin install buddy-evolution@buddy-evolution
 ```
 
-Restart Claude Code. Your buddy will greet you on the next session start:
+Restart Claude Code. On next session start, your buddy greets you:
 
 ```
-🐙 A wild octopus appeared! Meet Cinder!
-   Rarity: rare | Personality: analytical
-   Your companion will track your progress across sessions.
+🐉 Zephyr | Level 7 Elder | 35,200 / 50,000 XP | Streak: 12d
+   Last session: +840 XP | 🏆 Test-Driven
 ```
 
-After your first session ends, you'll see:
+On session end, you see:
 
 ```
-🐙 Session complete! +615 XP
-   Level 2 ████████████░░░░░░░░ 1,615 / 3,000 XP
-   🏆 First Steps — Complete your first session (+100 XP)
-```
-
-And on the next start:
-
-```
-🐙 Cinder welcomes you! Level 2 Hatchling ████████░░░░░░░ 1,615 / 3,000 XP
-   Streak: 1 day | Sessions: 1
-   Last session: +615 XP | 🏆 First Steps | Level 1 → 2
+🐉 Session complete! +840 XP
+   Level 7 ██████████████████░░ 36,040 / 50,000 XP
+   🏆 The Architect — 20+ file edits (+500 XP)
 ```
 
 ### Alternative: manual install
-
-Clone the repo and add hooks to `~/.claude/settings.json` manually:
 
 ```bash
 git clone https://github.com/FrankFMY/buddy-evolution ~/buddy-evolution
 ```
 
-Add to your `~/.claude/settings.json` inside the `"hooks"` object:
+Add to `~/.claude/settings.json` inside `"hooks"`:
 
 ```json
 "SessionStart": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-start.js", "timeout": 5 }] }],
@@ -74,154 +64,192 @@ Add to your `~/.claude/settings.json` inside the `"hooks"` object:
 | Command | Description |
 |---|---|
 | `/buddy-evolution:stats` | Level, XP, stats, streak, top files, top projects |
-| `/buddy-evolution:achievements` | Earned, in-progress, locked achievements |
-| `/buddy-evolution:journal` | Recent session history + weekly summaries |
+| `/buddy-evolution:achievements` | Earned, in-progress, locked, hidden |
+| `/buddy-evolution:journal` | Session history + weekly summaries |
 | `/buddy-evolution:evolve` | Choose evolution path (Level 5 / 10) |
-| `/buddy-evolution:rename` | Rename your buddy |
-| `/buddy-evolution:export` | Generate shareable stats card |
-| `/buddy-evolution:dashboard` | Open visual HTML dashboard in browser |
+| `/buddy-evolution:customize` | Change species, personality, name, stats |
+| `/buddy-evolution:rename` | Quick rename |
+| `/buddy-evolution:export` | Shareable stats card |
+| `/buddy-evolution:dashboard` | HTML dashboard in browser |
 | `/buddy-evolution:help` | How the plugin works |
 
-## How It Works
+## Architecture
 
 ```
-Session Start ──→ Inject companion personality + greeting directive
-       │                Claude greets with buddy stats, reflects personality
-       │
-   You code normally (buddy personality shapes Claude's style)
-       │
-Session End ────→ Parse transcript ──→ Extract metrics
-                                           │
-                    ┌──────────────────────┤
-                    │                      │
-              Update stats          Check achievements
-              Calculate XP          Update familiarity
-              Check level up        Desktop notifications
-                    │                      │
-                    └──────────┬───────────┘
-                               │
-                    Save soul + journal entry
-                    Print summary + progress bar
+┌─────────────────────────────────────────────────────────────┐
+│                     SESSION START                           │
+│  hooks/session-start.js                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  │
+│  │ Load soul.json│→│ Check streak │→│ Generate context  │  │
+│  └──────────────┘  └──────────────┘  │ (personality +   │  │
+│                                       │  mood + greeting  │  │
+│                                       │  + lastSession)   │  │
+│                                       └────────┬─────────┘  │
+│                                                ↓             │
+│                                    Inject into Claude's      │
+│                                    conversation context      │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+              Claude works with buddy personality
+              (12 types × 7 moods shape responses)
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│                      SESSION END                            │
+│  hooks/session-end.js                                       │
+│  ┌──────────────┐                                           │
+│  │Parse transcript│→ tool calls, file edits, test runs,     │
+│  │(JSONL)        │  duration, rejected calls                │
+│  └──────┬───────┘                                           │
+│         ↓                                                   │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 1. Update lifetime    │ 6. Weekly summary check      │   │
+│  │ 2. Update streak      │ 7. Save lastSession          │   │
+│  │ 3. Grow stats (DR)    │ 8. Backup + save soul        │   │
+│  │ 4. Update familiarity │ 9. Append journal             │   │
+│  │ 5. Check achievements │ 10. Desktop notification      │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+## Progression
 
 ### XP Sources
 
-| Source | XP |
-|---|---|
-| Session completion | 200 (flat) |
-| Tool call | 5 each |
-| File edit | 15 each |
-| Test run | 30 each |
-| Duration | 20 per 10 min (capped at 300) |
-| Streak multiplier | 1.0x → 2.0x over 11 consecutive days |
+| Source | XP | Notes |
+|---|---|---|
+| Session completion | 200 | Flat bonus per session |
+| Tool call | 5 | Every Read, Write, Edit, Bash, Grep, Glob |
+| File edit | 15 | Write or Edit tool |
+| Test run | 30 | Detected from Bash commands (jest, pytest, cargo test, etc.) |
+| Duration | 20/10min | Capped at 300 (2.5 hours) |
+| **Streak multiplier** | **1.0x → 2.0x** | +0.1x per consecutive day, caps at day 11 |
+
+### Levels & Tiers
+
+```
+Level  1 ─────── Hatchling
+Level  5 ─────── Juvenile    ← First evolution choice
+Level 10 ─────── Adult       ← Second evolution choice (4 final forms)
+Level 15 ─────── Elder
+Level 20 ─────── Ascended
+```
+
+~17 sessions to Level 5. ~114 sessions to Level 10.
+
+### Stats
+
+| Stat | Grows from | What it means |
+|---|---|---|
+| DEBUGGING | File edits + test runs | Code iteration intensity |
+| PATIENCE | Session duration | Long session endurance |
+| CHAOS | Rejected tool call ratio | Unpredictable sessions |
+| WISDOM | Output volume | Deep thinking sessions |
+| SNARK | Tool density (tools/min) | Intense, fast-paced work |
+
+All stats use **diminishing returns**: `growth × (100 / (100 + currentGrowth))`. Fast early growth, asymptotic cap at 200.
 
 ### Evolution
 
-At Level 5 and 10, your buddy can evolve. Each of the 18 species has unique evolution paths — 2 choices at Level 5, then 2 sub-choices at Level 10, giving 4 possible final forms per species. Use `/buddy-evolution:evolve` to choose.
+Each of the 18 species has unique paths. Example (Dragon):
 
 ```
-🐙 Cinder is ready to evolve!
-
-  [A] Strategist — calculated, always three steps ahead
-  [B] Artist — creative, sees patterns others miss
+              🐉 Dragon
+               /     \
+         Elder         Storm
+         /   \         /    \
+   Ancient   Wyrm  Tempest  Inferno
 ```
+
+Use `/buddy-evolution:evolve` at Level 5 and 10 to choose. Choices are permanent.
 
 ### Achievements
 
 <details>
 <summary>View all 34 achievements</summary>
 
-#### Coding
-| Achievement | Trigger | XP | Rarity |
-|---|---|---|---|
-| First Steps | First session | 100 | Common |
-| Getting Comfortable | 10 sessions | 200 | Common |
-| Centurion | 100 sessions | 1,000 | Uncommon |
-| Veteran | 500 sessions | 3,000 | Rare |
-| Living Legend | 1,000 sessions | 10,000 | Legendary |
-| The Architect | 20+ file edits/session | 500 | Rare |
-| Tool Master | 100+ tool calls/session | 400 | Uncommon |
-| Wordsmith | 100K+ output tokens/session | 600 | Rare |
+**Coding** — First Steps (100), Getting Comfortable (200), Centurion (1K), Veteran (3K), Living Legend (10K), The Architect (500), Tool Master (400), Wordsmith (600)
 
-#### Testing
-| Achievement | Trigger | XP | Rarity |
-|---|---|---|---|
-| First Test | Run tests | 100 | Common |
-| Test Enthusiast | 10+ test runs | 300 | Uncommon |
-| Test Marathon | 50+ test runs | 1,000 | Epic |
-| Test-Driven | Tests in 10 consecutive sessions | 800 | Rare |
+**Testing** — First Test (100), Test Enthusiast (300), Test Marathon (1K), Test-Driven (800)
 
-#### Debugging
-| Achievement | Trigger | XP | Rarity |
-|---|---|---|---|
-| Persistence | 5+ rejected calls, still finish work | 300 | Uncommon |
-| Against All Odds | 20+ rejected calls, still finish work | 800 | Epic |
-| Unbreakable | 0 rejected in 50+ call session | 500 | Rare |
-| Context Survivor | Productive work after context reset | 400 | Uncommon |
+**Debugging** — Persistence (300), Against All Odds (800), Unbreakable (500), Context Survivor (400)
 
-#### Consistency
-| Achievement | Trigger | XP | Rarity |
-|---|---|---|---|
-| Streak: Week | 7 days | 500 | Common |
-| Streak: Month | 30 days | 2,000 | Rare |
-| Streak: Quarter | 90 days | 5,000 | Epic |
-| Streak: Year | 365 days | 20,000 | Legendary |
-| Early Bird ♻️ | Session before 7 AM | 100 | Common |
-| Night Owl ♻️ | Session past midnight | 100 | Common |
-| Marathon | 4+ hour session | 600 | Rare |
+**Consistency** — Streak: Week (500), Month (2K), Quarter (5K), Year (20K), Early Bird ♻️ (100), Night Owl ♻️ (100), Marathon (600)
 
-#### Exploration
-| Achievement | Trigger | XP | Rarity |
-|---|---|---|---|
-| Tourist | 5 projects | 400 | Uncommon |
-| Globe Trotter | 20 projects | 1,500 | Epic |
-| Deep Roots | Expert on 5 files | 800 | Rare |
-| Homecoming | Return after 30+ days | 200 | Common |
-| Old Friend | Return to Expert file after 60+ days | 500 | Rare |
+**Exploration** — Tourist (400), Globe Trotter (1.5K), Deep Roots (800), Homecoming (200), Old Friend (500)
 
-#### Meta
-| Achievement | Trigger | XP | Rarity |
-|---|---|---|---|
-| Pet Day | Pet buddy 10 times | 50 | Common |
-| First Evolution | Level 5 evolution choice | 1,000 | Uncommon |
-| Final Form | Level 10 evolution choice | 3,000 | Rare |
-| The Collector | 20 achievements | 2,000 | Epic |
-| 🔒 Hidden | ??? | ??? | Legendary |
-| 🔒 Hidden | ??? | ??? | Legendary |
+**Meta** — Pet Day (50), First Evolution (1K), Final Form (3K), The Collector (2K), 🔒 Hidden ×2
 
 </details>
 
-## Data
+## 18 Species
 
-All data is stored locally at `~/.buddy-evolution/`:
+| Rarity | Species |
+|---|---|
+| Common | 🦆 Duck, 🪿 Goose, 🫠 Blob, 🐌 Snail |
+| Uncommon | 🐱 Cat, 🐰 Rabbit, 🦉 Owl, 🐧 Penguin |
+| Rare | 🐢 Turtle, 🐙 Octopus, 🦎 Axolotl |
+| Epic | 👻 Ghost, 🤖 Robot, 🐉 Dragon |
+| Legendary | 🦫 Capybara, 🍄 Mushroom, 🌵 Cactus, 🐻 Chonk |
+
+Species is randomly assigned at creation. Use `/buddy-evolution:customize` to change anytime.
+
+## 12 Personalities
+
+| Type | Communication style |
+|---|---|
+| analytical | Precise, data-driven, references metrics |
+| bold | Confident, direct, pushes forward |
+| curious | Asks follow-ups, explores tangents |
+| enthusiastic | High energy, celebrates wins |
+| gentle | Warm, supportive, no pressure |
+| mischievous | Teasing, surprises, unpredictable |
+| playful | Light humor, wordplay |
+| protective | Watches out, reminds about breaks |
+| sarcastic | Dry wit, friendly teasing |
+| stoic | Minimal, focused, essential only |
+| dreamy | Philosophical, big picture |
+| methodical | Organized, step-by-step |
+
+## Data
 
 ```
 ~/.buddy-evolution/
-├── soul.json              # Companion state (identity, stats, achievements, progression)
+├── soul.json                # All companion state
+├── backups/                 # Last 3 auto-backups of soul.json
 └── journal/
-    ├── 2026-04.md         # April sessions + weekly summaries
-    └── 2026-05.md         # May sessions
+    └── YYYY-MM.md           # Monthly session logs + weekly summaries
 ```
 
-Nothing is sent externally. Your data stays on your machine.
+Nothing is sent externally. All data stays on your machine. Soul backups are created automatically before each save.
+
+## Development
+
+```bash
+# Run tests (72 tests, 0 dependencies)
+node test.js
+
+# File structure
+lib/
+├── constants.js     # Species, XP rates, thresholds, evolution paths
+├── soul.js          # Soul CRUD + backup + creation
+├── transcript.js    # JSONL transcript parser
+├── xp.js            # XP calculation, streaks, stat growth, leveling
+├── achievements.js  # 34 achievement definitions + detection
+├── journal.js       # Journal entries + weekly summaries
+├── personality.js   # 12 personalities, 7 moods, companion context
+├── dashboard.js     # HTML dashboard generator
+└── notify.js        # OS-native desktop notifications
+```
 
 ## Background
 
-On April 1, 2026, Anthropic released `/buddy` — a Tamagotchi-style ASCII companion for Claude Code. The community loved it and immediately started designing progression systems. Anthropic confirmed it was April Fools only.
+On April 1, 2026, Anthropic released `/buddy` — a Tamagotchi-style ASCII companion for Claude Code. The community loved it and designed progression systems. Anthropic confirmed it was April Fools only.
 
-This plugin implements the community-designed [buddy evolution specification](https://github.com/Hegemon78/buddy-evolution-spec):
-- Achievement-based progression (not idle grinding)
-- Stats that reflect your coding patterns
-- Session journal with weekly summaries
-- File familiarity tracking
-- Evolution branching paths
+This plugin implements the community [buddy-evolution spec](https://github.com/Hegemon78/buddy-evolution-spec).
 
 ## Contributing
 
-Issues and PRs welcome. The plugin is designed to be extensible:
-- Add achievements in `lib/achievements.js`
-- Add species or tune XP in `lib/constants.js`
-- Add skills in `skills/`
+Issues and PRs welcome.
 
 ## License
 

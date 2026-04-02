@@ -8,8 +8,8 @@ SOUL_FILE="$HOME/.buddy-evolution/soul.json"
 # Read stdin (hook input)
 INPUT=$(cat)
 
-# Parse tool name
-TOOL_NAME=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+# Parse tool name (handle both "key":"val" and "key": "val" formats)
+TOOL_NAME=$(echo "$INPUT" | grep -o '"tool_name": *"[^"]*"' | head -1 | sed 's/.*: *"//;s/"//')
 
 # Initialize counter file if missing
 if [ ! -f "$COUNTER_FILE" ]; then
@@ -28,7 +28,7 @@ case "$TOOL_NAME" in
   Write|Edit) EDITS=$((EDITS + 1)) ;;
   Read) READS=$((READS + 1)) ;;
   Bash)
-    CMD=$(echo "$INPUT" | grep -o '"command":"[^"]*"' | head -1 | cut -d'"' -f4)
+    CMD=$(echo "$INPUT" | grep -o '"command": *"[^"]*"' | head -1 | sed 's/.*: *"//;s/"//')
     if echo "$CMD" | grep -qiE '(jest|vitest|pytest|cargo test|go test|npm test|pnpm test|rspec)'; then
       TESTS=$((TESTS + 1))
     fi

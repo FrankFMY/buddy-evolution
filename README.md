@@ -25,7 +25,7 @@ Born from the community response to Anthropic's `/buddy` April Fools feature. Th
 - **Auto backup** — 3 rotating soul backups
 - **72 automated tests** — full test suite
 - **Zero dependencies** — pure Node.js, no npm install
-- **Fully local** — no data leaves your machine
+- **Local state** — companion progress and journals stay in local files; no plugin telemetry service
 
 ## Install
 
@@ -55,11 +55,14 @@ On session end, you see:
 git clone https://github.com/FrankFMY/buddy-evolution ~/buddy-evolution
 ```
 
-Add to `~/.claude/settings.json` inside `"hooks"`:
+Merge these entries into the `hooks` object in `~/.claude/settings.json` (keep any hooks you already use). The manual commands below use Bash; on Windows use a compatible Bash environment.
 
 ```json
-"SessionStart": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-start.js", "timeout": 5 }] }],
-"SessionEnd": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-end.js", "timeout": 30 }] }]
+{
+  "SessionStart": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-start.js", "timeout": 5 }] }],
+  "PostToolUse": [{ "hooks": [{ "type": "command", "command": "bash ~/buddy-evolution/hooks/post-tool-use.sh", "timeout": 3 }] }],
+  "SessionEnd": [{ "hooks": [{ "type": "command", "command": "node ~/buddy-evolution/hooks/session-end.js", "timeout": 30 }] }]
+}
 ```
 
 ## Commands
@@ -223,7 +226,7 @@ Species is randomly assigned at creation. Use `/buddy-evolution:customize` to ch
     └── YYYY-MM.md           # Monthly session logs + weekly summaries
 ```
 
-Nothing is sent externally. All data stays on your machine. Soul backups are created automatically before each save.
+The plugin stores companion state, backups and journals locally and does not send telemetry to a plugin service. Hook-generated context is passed into your Claude Code session, so that context follows the session's provider and privacy settings. Soul backups are created automatically before each save.
 
 ## Development
 
@@ -254,6 +257,14 @@ This plugin implements the community [buddy-evolution spec](https://github.com/H
 
 Issues and PRs welcome.
 
+## Author and contact
+
+**Artem Prianishnikov** · [FrankFMY](https://github.com/FrankFMY)
+
+[Website](https://frankfmy.com) · [Telegram](https://t.me/FrankFMY) · [LinkedIn](https://www.linkedin.com/in/frankfmy/) · [X](https://x.com/FrankFMY) · [npm profile](https://www.npmjs.com/~frankfmy)
+
+Email: [frankfmy@proton.me](mailto:frankfmy@proton.me) · [Pryanishnikovartem@gmail.com](mailto:Pryanishnikovartem@gmail.com)
+
 ## License
 
-MIT
+[MIT](LICENSE). Original copyright notices are preserved.
